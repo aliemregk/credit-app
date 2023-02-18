@@ -18,7 +18,7 @@ import com.credit.app.core.utilities.results.dataResults.ErrorDataResult;
 import com.credit.app.core.utilities.results.dataResults.SuccessDataResult;
 import com.credit.app.dataAccess.abstracts.CreditDao;
 import com.credit.app.entities.concretes.Credit;
-import com.credit.app.entities.concretes.Customer;
+import com.credit.app.entities.concretes.IndividualCustomer;
 
 import lombok.AllArgsConstructor;
 
@@ -54,7 +54,7 @@ public class CreditManager implements CreditService {
         double guarantee = 0;
         // -----------------------
         if (creditScore > Constants.CREDIT_SCORE_MIN) {
-            final Customer customer = getCustomerDetails(nationalId);
+            final IndividualCustomer customer = getCustomerDetails(nationalId);
             final Credit credit = creditDao.save(new Credit(generateCredit(creditScore, income, guarantee), customer));
             return new SuccessDataResult<>(MESSAGE + Messages.ADDED, credit);
         }
@@ -102,7 +102,11 @@ public class CreditManager implements CreditService {
         }
     }
 
-    private Customer getCustomerDetails(String nationalId) {
-        return customerService.getByNationalId(nationalId).getData();
+    private IndividualCustomer getCustomerDetails(String nationalId) {
+        DataResult<IndividualCustomer> result = customerService.getByNationalId(nationalId);
+        if (Boolean.TRUE.equals(result.getSuccess())) {
+            return result.getData();
+        }
+        throw new IllegalArgumentException();
     }
 }

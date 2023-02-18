@@ -1,15 +1,9 @@
 package com.credit.app.entities.concretes;
 
 import java.time.LocalDate;
-import java.util.Set;
-
-import com.credit.app.entities.abstracts.AbstractEntity;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import jakarta.persistence.CascadeType;
+import com.credit.app.entities.abstracts.AbstractCustomer;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,13 +11,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "customers")
+@Table(name = "individual_customers")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonIgnoreProperties({ "hibernatelazyInitializer", "handle", "credits" })
-public class Customer extends AbstractEntity {
+public class IndividualCustomer extends AbstractCustomer {
 
     @Column(nullable = false)
     private String firstName;
@@ -38,14 +31,6 @@ public class Customer extends AbstractEntity {
     private double income;
 
     @Column(nullable = false)
-    private String phone;
-
-    @Column(nullable = false)
     private LocalDate birthDate;
 
-    @Column
-    private double guarantee;
-
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "customer")
-    private Set<Credit> credits;
 }

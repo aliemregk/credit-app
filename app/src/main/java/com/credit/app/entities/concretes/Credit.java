@@ -25,5 +25,5 @@ public class Credit extends AbstractEntity {
 
     @ManyToOne
     @JoinColumn
-    private Customer customer;
+    private IndividualCustomer customer;
 }
