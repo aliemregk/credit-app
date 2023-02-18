@@ -32,7 +32,7 @@ public class Customer extends AbstractEntity {
     private String lastName;
 
     @Column(nullable = false)
-    private String nationalID;
+    private String nationalId;
 
     @Column(nullable = false)
     private double income;

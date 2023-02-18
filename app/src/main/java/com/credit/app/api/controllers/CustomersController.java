@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.credit.app.business.abstracts.CustomerService;
+import com.credit.app.core.utilities.results.Result;
+import com.credit.app.core.utilities.results.dataResults.DataResult;
 import com.credit.app.entities.concretes.Customer;
 
 import lombok.AllArgsConstructor;
@@ -24,27 +26,27 @@ public class CustomersController {
     private CustomerService customerService;
 
     @GetMapping(path = "getall")
-    public Collection<Customer> getAll() {
+    public DataResult<Collection<Customer>> getAll() {
         return customerService.getAll();
     }
 
     @GetMapping(path = "getbyid")
-    public Customer getById(@RequestParam Long id) {
+    public DataResult<Customer> getById(@RequestParam Long id) {
         return customerService.getById(id);
     }
 
     @PostMapping(path = "add")
-    public Customer add(@RequestBody Customer customer) {
+    public DataResult<Customer> add(@RequestBody Customer customer) {
         return customerService.add(customer);
     }
 
     @PutMapping(path = "update")
-    public Customer update(@RequestBody Customer customer) {
+    public DataResult<Customer> update(@RequestBody Customer customer) {
         return customerService.update(customer);
     }
 
     @DeleteMapping(path = "delete")
-    public void delete(@RequestParam Long id) {
-        customerService.delete(id);
+    public Result delete(@RequestParam Long id) {
+        return customerService.delete(id);
     }
 }
