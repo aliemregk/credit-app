@@ -6,8 +6,19 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.credit.app.business.abstracts.CreditService;
+import com.credit.app.business.abstracts.CustomerService;
+import com.credit.app.business.constants.Constants;
+import com.credit.app.business.constants.Messages;
+import com.credit.app.business.utilities.creditScore.CreditScoreService;
+import com.credit.app.core.utilities.results.ErrorResult;
+import com.credit.app.core.utilities.results.Result;
+import com.credit.app.core.utilities.results.SuccessResult;
+import com.credit.app.core.utilities.results.dataResults.DataResult;
+import com.credit.app.core.utilities.results.dataResults.ErrorDataResult;
+import com.credit.app.core.utilities.results.dataResults.SuccessDataResult;
 import com.credit.app.dataAccess.abstracts.CreditDao;
 import com.credit.app.entities.concretes.Credit;
+import com.credit.app.entities.concretes.Customer;
 
 import lombok.AllArgsConstructor;
 
@@ -15,42 +26,83 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class CreditManager implements CreditService {
 
+    private static final String MESSAGE = "Credit(s)";
     private CreditDao creditDao;
+    private CustomerService customerService;
+    private CreditScoreService creditScoreService;
 
     @Override
-    public Collection<Credit> getAll() {
-        return creditDao.findAll();
+    public DataResult<Collection<Credit>> getAll() {
+        return new SuccessDataResult<>(MESSAGE + Messages.LISTED, creditDao.findAll());
     }
 
     @Override
-    public Credit getById(Long id) {
+    public DataResult<Credit> getById(Long id) {
         Optional<Credit> result = creditDao.findById(id);
         if (result.isPresent()) {
-            return result.get();
+            return new SuccessDataResult<>(MESSAGE + Messages.LISTED, result.get());
         }
-        return null;
+        return new ErrorDataResult<>(MESSAGE + Messages.NOT_FOUND, null);
     }
 
     @Override
-    public Credit add(Credit credit) {
-        return creditDao.save(credit);
+    public DataResult<Credit> add(String nationalId) {
+
+        final int creditScore = checkCreditScore(nationalId);
+        // TODO refactor
+        double income = 5000;
+        double guarantee = 0;
+        // -----------------------
+        if (creditScore > Constants.CREDIT_SCORE_MIN) {
+            final Customer customer = getCustomerDetails(nationalId);
+            final Credit credit = creditDao.save(new Credit(generateCredit(creditScore, income, guarantee), customer));
+            return new SuccessDataResult<>(MESSAGE + Messages.ADDED, credit);
+        }
+        return new ErrorDataResult<>(Messages.INSUFFICIENT_CREDIT_SCORE, null);
     }
 
     @Override
-    public Credit update(Credit credit) {
+    public DataResult<Credit> update(Credit credit) {
         Optional<Credit> result = creditDao.findById(credit.getId());
         if (result.isPresent()) {
-            return creditDao.save(credit);
+            return new SuccessDataResult<>(MESSAGE + Messages.UPDATED, creditDao.save(credit));
         }
-        return null;
+        return new ErrorDataResult<>(Messages.UPDATED_ERR, null);
     }
 
     @Override
-    public void delete(Long id) {
+    public Result delete(Long id) {
         Optional<Credit> result = creditDao.findById(id);
         if (result.isPresent()) {
             creditDao.delete(result.get());
+            return new SuccessResult(MESSAGE + Messages.DELETED);
+        }
+        return new ErrorResult(MESSAGE + Messages.DELETED_ERR);
+    }
+
+    private int checkCreditScore(String nationalId) {
+        return creditScoreService.getCreditScore(nationalId);
+    }
+
+    private double generateCredit(int creditScore, double income, double guarantee) {
+        if (creditScore < Constants.CREDIT_SCORE_LIMIT) {
+            return calculateCreditAmount(income, guarantee);
+        } else {
+            return (income * Constants.CREDIT_LIMIT_MULTIPLIER) + (guarantee * Constants.MAX_GUARANTEE);
         }
     }
 
+    private double calculateCreditAmount(double income, double guarantee) {
+        if (income < Constants.INCOME_MIN) {
+            return Constants.MIN_CREDIT_AMOUNT + (guarantee * Constants.MIN_GUARANTEE);
+        } else if (income < Constants.INCOME_MAX) {
+            return Constants.MID_CREDIT_AMOUNT + (guarantee * Constants.LOW_GUARANTEE);
+        } else {
+            return (income * Constants.CREDIT_LIMIT_MULTIPLIER / 2) + (guarantee * Constants.MID_GUARANTEE);
+        }
+    }
+
+    private Customer getCustomerDetails(String nationalId) {
+        return customerService.getByNationalId(nationalId).getData();
+    }
 }
