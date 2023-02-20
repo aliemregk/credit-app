@@ -7,7 +7,12 @@ import org.springframework.stereotype.Service;
 
 import com.credit.app.business.abstracts.CustomerService;
 import com.credit.app.business.constants.Messages;
-import com.credit.app.core.utilities.results.ErrorResult;
+import com.credit.app.business.requests.individualCustomer.AddIndividualCustomerRequest;
+import com.credit.app.business.requests.individualCustomer.UpdateIndividualCustomerRequest;
+import com.credit.app.business.responses.individualCustomer.GetAllIndividualCustomerResponse;
+import com.credit.app.business.responses.individualCustomer.GetByIdIndividualCustomerResponse;
+import com.credit.app.business.responses.individualCustomer.GetByNationalIdIndividualCustomerResponse;
+import com.credit.app.core.utilities.mapper.MapperUtil;
 import com.credit.app.core.utilities.results.Result;
 import com.credit.app.core.utilities.results.SuccessResult;
 import com.credit.app.core.utilities.results.dataResults.DataResult;
@@ -26,48 +31,46 @@ public class CustomerManager implements CustomerService {
     private IndividualCustomerDao individualCustomerDao;
 
     @Override
-    public DataResult<Collection<IndividualCustomer>> getAll() {
-        return new SuccessDataResult<>(MESSAGE + Messages.LISTED, individualCustomerDao.findAll());
+    public DataResult<Collection<GetAllIndividualCustomerResponse>> getAll() {
+        Collection<IndividualCustomer> customers = individualCustomerDao.findAll();
+        return new SuccessDataResult<>(MESSAGE + Messages.LISTED,
+                MapperUtil.mapAll(customers, GetAllIndividualCustomerResponse.class));
     }
 
     @Override
-    public DataResult<IndividualCustomer> getById(Long id) {
-        Optional<IndividualCustomer> result = individualCustomerDao.findById(id);
-        if (result.isPresent()) {
-            return new SuccessDataResult<>(MESSAGE + Messages.LISTED, result.get());
-        }
-        return new ErrorDataResult<>(MESSAGE + Messages.NOT_FOUND, null);
+    public DataResult<GetByIdIndividualCustomerResponse> getById(Long id) {
+        IndividualCustomer customer = individualCustomerDao.findById(id).orElseThrow();
+        return new SuccessDataResult<>(MESSAGE + Messages.LISTED,
+                MapperUtil.map(customer, GetByIdIndividualCustomerResponse.class));
     }
 
     @Override
-    public DataResult<IndividualCustomer> add(IndividualCustomer customer) {
-        return new SuccessDataResult<>(MESSAGE + Messages.ADDED, individualCustomerDao.save(customer));
+    public Result add(AddIndividualCustomerRequest addRequest) {
+        IndividualCustomer customerToAdd = MapperUtil.map(addRequest, IndividualCustomer.class);
+        individualCustomerDao.save(customerToAdd);
+        return new SuccessResult(MESSAGE + Messages.ADDED);
     }
 
     @Override
-    public DataResult<IndividualCustomer> update(IndividualCustomer customer) {
-        Optional<IndividualCustomer> result = individualCustomerDao.findById(customer.getId());
-        if (result.isPresent()) {
-            return new SuccessDataResult<>(MESSAGE + Messages.UPDATED, individualCustomerDao.save(customer));
-        }
-        return new ErrorDataResult<>(Messages.UPDATED_ERR, null);
+    public Result update(UpdateIndividualCustomerRequest updateRequest) {
+        IndividualCustomer customerToUpdate = MapperUtil.map(updateRequest, IndividualCustomer.class);
+        individualCustomerDao.save(customerToUpdate);
+        return new SuccessResult(MESSAGE + Messages.UPDATED);
     }
 
     @Override
     public Result delete(Long id) {
-        Optional<IndividualCustomer> result = individualCustomerDao.findById(id);
-        if (result.isPresent()) {
-            individualCustomerDao.delete(result.get());
-            return new SuccessResult(MESSAGE + Messages.DELETED);
-        }
-        return new ErrorResult(MESSAGE + Messages.DELETED_ERR);
+        individualCustomerDao.deleteById(id);
+        return new SuccessResult(MESSAGE + Messages.DELETED);
     }
 
     @Override
-    public DataResult<IndividualCustomer> getByNationalId(String nationalId) {
+    public DataResult<GetByNationalIdIndividualCustomerResponse> getByNationalId(String nationalId) {
         Optional<IndividualCustomer> customer = individualCustomerDao.getByNationalId(nationalId);
         if (customer.isPresent()) {
-            return new SuccessDataResult<>(MESSAGE + Messages.LISTED, customer.get());
+            GetByNationalIdIndividualCustomerResponse response = MapperUtil.map(customer,
+                    GetByNationalIdIndividualCustomerResponse.class);
+            return new SuccessDataResult<>(MESSAGE + Messages.LISTED, response);
         }
         return new ErrorDataResult<>(MESSAGE + Messages.NOT_FOUND, null);
     }

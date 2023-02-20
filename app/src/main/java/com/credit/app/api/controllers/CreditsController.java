@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.credit.app.business.abstracts.CreditService;
+import com.credit.app.business.requests.credit.AddCreditRequest;
+import com.credit.app.business.responses.credit.CreditResultResponse;
+import com.credit.app.business.responses.credit.GetAllCreditResponse;
+import com.credit.app.business.responses.credit.GetByIdCreditResponse;
 import com.credit.app.core.utilities.results.Result;
 import com.credit.app.core.utilities.results.dataResults.DataResult;
 import com.credit.app.entities.concretes.Credit;
@@ -26,22 +30,22 @@ public class CreditsController {
     private CreditService creditService;
 
     @GetMapping(path = "getall")
-    public DataResult<Collection<Credit>> getAll() {
+    public DataResult<Collection<GetAllCreditResponse>> getAll() {
         return creditService.getAll();
     }
 
     @GetMapping(path = "getbyid")
-    public DataResult<Credit> getById(@RequestParam Long id) {
+    public DataResult<GetByIdCreditResponse> getById(@RequestParam Long id) {
         return creditService.getById(id);
     }
 
     @PostMapping(path = "add")
-    public DataResult<Credit> add(@RequestParam String nationalId) {
-        return creditService.add(nationalId);
+    public DataResult<CreditResultResponse> add(@RequestBody AddCreditRequest addCreditRequest) {
+        return creditService.add(addCreditRequest);
     }
 
     @PutMapping(path = "update")
-    public DataResult<Credit> update(@RequestBody Credit credit) {
+    public Result update(@RequestBody Credit credit) {
         return creditService.update(credit);
     }
 

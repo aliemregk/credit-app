@@ -9,8 +9,13 @@ import com.credit.app.business.abstracts.CreditService;
 import com.credit.app.business.abstracts.CustomerService;
 import com.credit.app.business.constants.Constants;
 import com.credit.app.business.constants.Messages;
+import com.credit.app.business.requests.credit.AddCreditRequest;
+import com.credit.app.business.responses.credit.CreditResultResponse;
+import com.credit.app.business.responses.credit.GetAllCreditResponse;
+import com.credit.app.business.responses.credit.GetByIdCreditResponse;
+import com.credit.app.business.responses.individualCustomer.GetByNationalIdIndividualCustomerResponse;
 import com.credit.app.business.utilities.creditScore.CreditScoreService;
-import com.credit.app.core.utilities.results.ErrorResult;
+import com.credit.app.core.utilities.mapper.MapperUtil;
 import com.credit.app.core.utilities.results.Result;
 import com.credit.app.core.utilities.results.SuccessResult;
 import com.credit.app.core.utilities.results.dataResults.DataResult;
@@ -32,52 +37,48 @@ public class CreditManager implements CreditService {
     private CreditScoreService creditScoreService;
 
     @Override
-    public DataResult<Collection<Credit>> getAll() {
-        return new SuccessDataResult<>(MESSAGE + Messages.LISTED, creditDao.findAll());
+    public DataResult<Collection<GetAllCreditResponse>> getAll() {
+        return new SuccessDataResult<>(MESSAGE + Messages.LISTED,
+                MapperUtil.mapAll(creditDao.findAll(), GetAllCreditResponse.class));
     }
 
     @Override
-    public DataResult<Credit> getById(Long id) {
+    public DataResult<GetByIdCreditResponse> getById(Long id) {
         Optional<Credit> result = creditDao.findById(id);
         if (result.isPresent()) {
-            return new SuccessDataResult<>(MESSAGE + Messages.LISTED, result.get());
+            return new SuccessDataResult<>(MESSAGE + Messages.LISTED,
+                    MapperUtil.map(result.get(), GetByIdCreditResponse.class));
         }
         return new ErrorDataResult<>(MESSAGE + Messages.NOT_FOUND, null);
     }
 
     @Override
-    public DataResult<Credit> add(String nationalId) {
+    public DataResult<CreditResultResponse> add(AddCreditRequest addCreditRequest) {
 
-        final int creditScore = checkCreditScore(nationalId);
+        final int creditScore = checkCreditScore(addCreditRequest.getNationalId());
         // TODO refactor
-        double income = 5000;
-        double guarantee = 0;
+        final double income = addCreditRequest.getIncome();
+        final double guarantee = addCreditRequest.getGuarantee();
         // -----------------------
         if (creditScore > Constants.CREDIT_SCORE_MIN) {
-            final IndividualCustomer customer = getCustomerDetails(nationalId);
+            final IndividualCustomer customer = getCustomerDetails(addCreditRequest.getNationalId());
             final Credit credit = creditDao.save(new Credit(generateCredit(creditScore, income, guarantee), customer));
-            return new SuccessDataResult<>(MESSAGE + Messages.ADDED, credit);
+            return new SuccessDataResult<>(MESSAGE + Messages.ADDED,
+                    MapperUtil.map(credit, CreditResultResponse.class));
         }
         return new ErrorDataResult<>(Messages.INSUFFICIENT_CREDIT_SCORE, null);
     }
 
     @Override
-    public DataResult<Credit> update(Credit credit) {
-        Optional<Credit> result = creditDao.findById(credit.getId());
-        if (result.isPresent()) {
-            return new SuccessDataResult<>(MESSAGE + Messages.UPDATED, creditDao.save(credit));
-        }
-        return new ErrorDataResult<>(Messages.UPDATED_ERR, null);
+    public Result update(Credit credit) {
+        creditDao.save(credit);
+        return new SuccessResult(MESSAGE + Messages.UPDATED);
     }
 
     @Override
     public Result delete(Long id) {
-        Optional<Credit> result = creditDao.findById(id);
-        if (result.isPresent()) {
-            creditDao.delete(result.get());
-            return new SuccessResult(MESSAGE + Messages.DELETED);
-        }
-        return new ErrorResult(MESSAGE + Messages.DELETED_ERR);
+        creditDao.deleteById(id);
+        return new SuccessResult(MESSAGE + Messages.DELETED);
     }
 
     private int checkCreditScore(String nationalId) {
@@ -103,9 +104,9 @@ public class CreditManager implements CreditService {
     }
 
     private IndividualCustomer getCustomerDetails(String nationalId) {
-        DataResult<IndividualCustomer> result = customerService.getByNationalId(nationalId);
+        DataResult<GetByNationalIdIndividualCustomerResponse> result = customerService.getByNationalId(nationalId);
         if (Boolean.TRUE.equals(result.getSuccess())) {
-            return result.getData();
+            return MapperUtil.map(result.getData(), IndividualCustomer.class);
         }
         throw new IllegalArgumentException();
     }
