@@ -17,12 +17,11 @@ public final class Messages {
     public static final String DELETED_ERR = "Error while deleting.";
     public static final String UPDATED_ERR = "Error while updating.";
 
-    public static final String REQUIRED = " is required";
+    public static final String REQUIRED = " is required.";
     public static final String INVALID = " is invalid.";
-    public static final String TOO_SHORT = " is too short";
-    public static final String TOO_LONG = " is too long";
-    public static final String MIN = " can not be less than ";
-    public static final String MAX = " can not be more than ";
+    public static final String TOO_SHORT = " is too short.";
+    public static final String TOO_LONG = " is too long.";
+    public static final String MIN = " can not be less than 0.";
 
     private Messages() {
     }
