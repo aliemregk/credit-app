@@ -49,7 +49,7 @@ public class CustomerManager implements CustomerService {
     public DataResult<IndividualCustomer> add(AddIndividualCustomerRequest addRequest) {
 
         Result result = BusinessRules.run(checkCustomerExists(addRequest.getNationalId()));
-        if (result.isSuccess()) {
+        if (!result.isSuccess()) {
             return new ErrorDataResult<>(result.getMessage(), null);
         }
         IndividualCustomer customerToAdd = MapperUtil.map(addRequest, IndividualCustomer.class);
