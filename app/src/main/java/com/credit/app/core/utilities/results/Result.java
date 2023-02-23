@@ -5,14 +5,14 @@ import lombok.Getter;
 @Getter
 public class Result {
     private String message;
-    private boolean success;
+    private Boolean success;
 
-    public Result(String message, boolean success) {
+    public Result(String message, Boolean success) {
         this(success);
         this.message = message;
     }
 
-    public Result(boolean success) {
+    public Result(Boolean success) {
         this.success = success;
     }
 

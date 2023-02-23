@@ -11,9 +11,8 @@ import com.credit.app.business.requests.individualCustomer.AddIndividualCustomer
 import com.credit.app.business.requests.individualCustomer.UpdateIndividualCustomerRequest;
 import com.credit.app.business.responses.individualCustomer.GetAllIndividualCustomerResponse;
 import com.credit.app.business.responses.individualCustomer.GetByIdIndividualCustomerResponse;
-import com.credit.app.core.utilities.business.BusinessRules;
+import com.credit.app.business.responses.individualCustomer.GetByNationalIdIndividualCustomerResponse;
 import com.credit.app.core.utilities.mapper.MapperUtil;
-import com.credit.app.core.utilities.results.ErrorResult;
 import com.credit.app.core.utilities.results.Result;
 import com.credit.app.core.utilities.results.SuccessResult;
 import com.credit.app.core.utilities.results.dataResults.DataResult;
@@ -46,15 +45,10 @@ public class CustomerManager implements CustomerService {
     }
 
     @Override
-    public DataResult<IndividualCustomer> add(AddIndividualCustomerRequest addRequest) {
-
-        Result result = BusinessRules.run(checkCustomerExists(addRequest.getNationalId()));
-        if (!result.isSuccess()) {
-            return new ErrorDataResult<>(result.getMessage(), null);
-        }
+    public Result add(AddIndividualCustomerRequest addRequest) {
         IndividualCustomer customerToAdd = MapperUtil.map(addRequest, IndividualCustomer.class);
         individualCustomerDao.save(customerToAdd);
-        return new SuccessDataResult<>(MESSAGE + Messages.ADDED, customerToAdd);
+        return new SuccessResult(MESSAGE + Messages.ADDED);
     }
 
     @Override
@@ -71,19 +65,14 @@ public class CustomerManager implements CustomerService {
     }
 
     @Override
-    public DataResult<IndividualCustomer> getByNationalId(String nationalId) {
+    public DataResult<GetByNationalIdIndividualCustomerResponse> getByNationalId(String nationalId) {
         Optional<IndividualCustomer> customer = individualCustomerDao.getByNationalId(nationalId);
         if (customer.isPresent()) {
-            return new SuccessDataResult<>(MESSAGE + Messages.LISTED, customer.get());
+            GetByNationalIdIndividualCustomerResponse response = MapperUtil.map(customer,
+                    GetByNationalIdIndividualCustomerResponse.class);
+            return new SuccessDataResult<>(MESSAGE + Messages.LISTED, response);
         }
         return new ErrorDataResult<>(MESSAGE + Messages.NOT_FOUND, null);
-    }
-
-    private Result checkCustomerExists(String nationalId) {
-        if (getByNationalId(nationalId).isSuccess()) {
-            return new ErrorResult(Messages.USER_EXISTS);
-        }
-        return new SuccessResult();
     }
 
 }
