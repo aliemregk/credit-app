@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.credit.app.business.abstracts.CustomerService;
+import com.credit.app.business.abstracts.IndividualCustomerService;
 import com.credit.app.business.requests.individualCustomer.UpdateIndividualCustomerRequest;
 import com.credit.app.business.responses.individualCustomer.GetAllIndividualCustomerResponse;
 import com.credit.app.business.responses.individualCustomer.GetByIdIndividualCustomerResponse;
@@ -21,11 +21,11 @@ import com.credit.app.core.utilities.results.dataResults.DataResult;
 import lombok.AllArgsConstructor;
 
 @RestController
-@RequestMapping(path = "/api/customers")
+@RequestMapping(path = "/api/individualcustomers/")
 @AllArgsConstructor
-public class CustomersController {
+public class IndividualCustomersController {
 
-    private CustomerService customerService;
+    private IndividualCustomerService customerService;
 
     @GetMapping(path = "getall")
     public DataResult<Collection<GetAllIndividualCustomerResponse>> getAll() {

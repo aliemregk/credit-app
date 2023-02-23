@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.credit.app.business.abstracts.CustomerService;
+import com.credit.app.business.abstracts.IndividualCustomerService;
 import com.credit.app.business.constants.Messages;
 import com.credit.app.business.requests.individualCustomer.AddIndividualCustomerRequest;
 import com.credit.app.business.requests.individualCustomer.UpdateIndividualCustomerRequest;
@@ -26,22 +26,21 @@ import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
-public class CustomerManager implements CustomerService {
+public class IndividualCustomerManager implements IndividualCustomerService {
 
-    private static final String MESSAGE = "Customer(s)";
     private IndividualCustomerDao individualCustomerDao;
 
     @Override
     public DataResult<Collection<GetAllIndividualCustomerResponse>> getAll() {
         Collection<IndividualCustomer> customers = individualCustomerDao.findAll();
-        return new SuccessDataResult<>(MESSAGE + Messages.LISTED,
+        return new SuccessDataResult<>(Messages.CUSTOMER_MESSAGE + Messages.LISTED,
                 MapperUtil.mapAll(customers, GetAllIndividualCustomerResponse.class));
     }
 
     @Override
     public DataResult<GetByIdIndividualCustomerResponse> getById(Long id) {
-        IndividualCustomer customer = individualCustomerDao.findById(id).orElseThrow();
-        return new SuccessDataResult<>(MESSAGE + Messages.LISTED,
+        final IndividualCustomer customer = individualCustomerDao.findById(id).orElseThrow();
+        return new SuccessDataResult<>(Messages.CUSTOMER_MESSAGE + Messages.LISTED,
                 MapperUtil.map(customer, GetByIdIndividualCustomerResponse.class));
     }
 
@@ -52,31 +51,31 @@ public class CustomerManager implements CustomerService {
         if (!result.isSuccess()) {
             return new ErrorDataResult<>(result.getMessage(), null);
         }
-        IndividualCustomer customerToAdd = MapperUtil.map(addRequest, IndividualCustomer.class);
-        individualCustomerDao.save(customerToAdd);
-        return new SuccessDataResult<>(MESSAGE + Messages.ADDED, customerToAdd);
+        final IndividualCustomer customerToAdd = MapperUtil.map(addRequest, IndividualCustomer.class);
+        return new SuccessDataResult<>(Messages.CUSTOMER_MESSAGE + Messages.ADDED,
+                individualCustomerDao.save(customerToAdd));
     }
 
     @Override
     public Result update(UpdateIndividualCustomerRequest updateRequest) {
-        IndividualCustomer customerToUpdate = MapperUtil.map(updateRequest, IndividualCustomer.class);
+        final IndividualCustomer customerToUpdate = MapperUtil.map(updateRequest, IndividualCustomer.class);
         individualCustomerDao.save(customerToUpdate);
-        return new SuccessResult(MESSAGE + Messages.UPDATED);
+        return new SuccessResult(Messages.CUSTOMER_MESSAGE + Messages.UPDATED);
     }
 
     @Override
     public Result delete(Long id) {
         individualCustomerDao.deleteById(id);
-        return new SuccessResult(MESSAGE + Messages.DELETED);
+        return new SuccessResult(Messages.CUSTOMER_MESSAGE + Messages.DELETED);
     }
 
     @Override
     public DataResult<IndividualCustomer> getByNationalId(String nationalId) {
         Optional<IndividualCustomer> customer = individualCustomerDao.getByNationalId(nationalId);
         if (customer.isPresent()) {
-            return new SuccessDataResult<>(MESSAGE + Messages.LISTED, customer.get());
+            return new SuccessDataResult<>(Messages.CUSTOMER_MESSAGE + Messages.LISTED, customer.get());
         }
-        return new ErrorDataResult<>(MESSAGE + Messages.NOT_FOUND, null);
+        return new ErrorDataResult<>(Messages.CUSTOMER_MESSAGE + Messages.NOT_FOUND, null);
     }
 
     private Result checkCustomerExists(String nationalId) {

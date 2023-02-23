@@ -6,8 +6,9 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.credit.app.business.abstracts.CreditService;
-import com.credit.app.business.abstracts.CustomerService;
+import com.credit.app.business.abstracts.IndividualCustomerService;
 import com.credit.app.business.constants.Constants;
+import com.credit.app.business.constants.CreditStatusEnum;
 import com.credit.app.business.constants.Messages;
 import com.credit.app.business.requests.credit.AddCreditRequest;
 import com.credit.app.business.requests.individualCustomer.AddIndividualCustomerRequest;
@@ -35,7 +36,7 @@ public class CreditManager implements CreditService {
 
     private static final String MESSAGE = "Credit(s)";
     private CreditDao creditDao;
-    private CustomerService customerService;
+    private IndividualCustomerService indCustomerService;
     private CreditScoreService creditScoreService;
 
     @Override
@@ -61,15 +62,16 @@ public class CreditManager implements CreditService {
 
         Result result = BusinessRules.run(checkCreditScore(creditScore));
         if (!result.isSuccess()) {
-            return new ErrorDataResult<>(result.getMessage(), null);
+            return new ErrorDataResult<>(result.getMessage(), new CreditResultResponse(0, CreditStatusEnum.DENIED));
         }
 
         final IndividualCustomer customer = getCustomerDetail(addCreditRequest);
         final double income = addCreditRequest.getIncome();
         final double guarantee = addCreditRequest.getGuarantee();
-
-        final Credit credit = creditDao.save(new Credit(generateCredit(creditScore, income, guarantee), customer));
-        return new SuccessDataResult<>(MESSAGE + Messages.ADDED, MapperUtil.map(credit, CreditResultResponse.class));
+        final double creditAmount = generateCredit(creditScore, income, guarantee);
+        creditDao.save(new Credit(creditAmount, customer));
+        return new SuccessDataResult<>(MESSAGE + Messages.ADDED,
+                new CreditResultResponse(creditAmount, CreditStatusEnum.APPROVED));
     }
 
     @Override
@@ -87,9 +89,9 @@ public class CreditManager implements CreditService {
     // Business functions
 
     private IndividualCustomer getCustomerDetail(AddCreditRequest request) {
-        DataResult<IndividualCustomer> result = customerService.getByNationalId(request.getNationalId());
+        DataResult<IndividualCustomer> result = indCustomerService.getByNationalId(request.getNationalId());
         if (!result.isSuccess()) {
-            return customerService.add(MapperUtil.map(request, AddIndividualCustomerRequest.class)).getData();
+            return indCustomerService.add(MapperUtil.map(request, AddIndividualCustomerRequest.class)).getData();
         }
         return result.getData();
     }
@@ -112,7 +114,8 @@ public class CreditManager implements CreditService {
         } else if (income < Constants.INCOME_MAX) {
             return Constants.MID_CREDIT_AMOUNT + (guarantee * Constants.LOW_GUARANTEE);
         } else {
-            return (income * Constants.CREDIT_LIMIT_MULTIPLIER / 2) + (guarantee * Constants.MID_GUARANTEE);
+            return (income * Constants.CREDIT_LIMIT_MULTIPLIER / Constants.CREDIT_LIMIT_DIVISOR)
+                    + (guarantee * Constants.MID_GUARANTEE);
         }
     }
 

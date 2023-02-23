@@ -2,6 +2,8 @@ package com.credit.app.business.constants;
 
 public final class Messages {
 
+    public static final String CUSTOMER_MESSAGE = "Customer(s) ";
+
     public static final String USER_EXISTS = "National ID is already registered.";
     public static final String USER_NOT_FOUND = "No user found with given national ID.";
     public static final String INSUFFICIENT_CREDIT_SCORE = "Insufficient credit score.";

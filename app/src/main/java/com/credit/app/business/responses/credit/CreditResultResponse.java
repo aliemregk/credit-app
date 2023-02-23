@@ -1,7 +1,6 @@
 package com.credit.app.business.responses.credit;
 
-import com.credit.app.business.responses.individualCustomer.GetByIdIndividualCustomerResponse;
-
+import com.credit.app.business.constants.CreditStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreditResultResponse {
-    private int id;
     private double amount;
-    private GetByIdIndividualCustomerResponse customer;
+    private CreditStatusEnum status;
 }
