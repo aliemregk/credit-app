@@ -5,7 +5,6 @@ import java.util.Collection;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.credit.app.business.abstracts.CustomerService;
-import com.credit.app.business.requests.individualCustomer.AddIndividualCustomerRequest;
 import com.credit.app.business.requests.individualCustomer.UpdateIndividualCustomerRequest;
 import com.credit.app.business.responses.individualCustomer.GetAllIndividualCustomerResponse;
 import com.credit.app.business.responses.individualCustomer.GetByIdIndividualCustomerResponse;
@@ -37,11 +35,6 @@ public class CustomersController {
     @GetMapping(path = "getbyid")
     public DataResult<GetByIdIndividualCustomerResponse> getById(@RequestParam Long id) {
         return customerService.getById(id);
-    }
-
-    @PostMapping(path = "add")
-    public Result add(@RequestBody AddIndividualCustomerRequest customer) {
-        return customerService.add(customer);
     }
 
     @PutMapping(path = "update")

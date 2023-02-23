@@ -10,12 +10,14 @@ import com.credit.app.business.abstracts.CustomerService;
 import com.credit.app.business.constants.Constants;
 import com.credit.app.business.constants.Messages;
 import com.credit.app.business.requests.credit.AddCreditRequest;
+import com.credit.app.business.requests.individualCustomer.AddIndividualCustomerRequest;
 import com.credit.app.business.responses.credit.CreditResultResponse;
 import com.credit.app.business.responses.credit.GetAllCreditResponse;
 import com.credit.app.business.responses.credit.GetByIdCreditResponse;
-import com.credit.app.business.responses.individualCustomer.GetByNationalIdIndividualCustomerResponse;
 import com.credit.app.business.utilities.creditScore.CreditScoreService;
+import com.credit.app.core.utilities.business.BusinessRules;
 import com.credit.app.core.utilities.mapper.MapperUtil;
+import com.credit.app.core.utilities.results.ErrorResult;
 import com.credit.app.core.utilities.results.Result;
 import com.credit.app.core.utilities.results.SuccessResult;
 import com.credit.app.core.utilities.results.dataResults.DataResult;
@@ -55,18 +57,19 @@ public class CreditManager implements CreditService {
     @Override
     public DataResult<CreditResultResponse> add(AddCreditRequest addCreditRequest) {
 
-        final int creditScore = checkCreditScore(addCreditRequest.getNationalId());
-        // TODO refactor
+        final int creditScore = getCreditScore(addCreditRequest.getNationalId());
+
+        Result result = BusinessRules.run(checkCreditScore(creditScore));
+        if (!result.isSuccess()) {
+            return new ErrorDataResult<>(result.getMessage(), null);
+        }
+
+        final IndividualCustomer customer = getCustomerDetail(addCreditRequest);
         final double income = addCreditRequest.getIncome();
         final double guarantee = addCreditRequest.getGuarantee();
-        // -----------------------
-        if (creditScore > Constants.CREDIT_SCORE_MIN) {
-            final IndividualCustomer customer = getCustomerDetails(addCreditRequest.getNationalId());
-            final Credit credit = creditDao.save(new Credit(generateCredit(creditScore, income, guarantee), customer));
-            return new SuccessDataResult<>(MESSAGE + Messages.ADDED,
-                    MapperUtil.map(credit, CreditResultResponse.class));
-        }
-        return new ErrorDataResult<>(Messages.INSUFFICIENT_CREDIT_SCORE, null);
+
+        final Credit credit = creditDao.save(new Credit(generateCredit(creditScore, income, guarantee), customer));
+        return new SuccessDataResult<>(MESSAGE + Messages.ADDED, MapperUtil.map(credit, CreditResultResponse.class));
     }
 
     @Override
@@ -81,7 +84,17 @@ public class CreditManager implements CreditService {
         return new SuccessResult(MESSAGE + Messages.DELETED);
     }
 
-    private int checkCreditScore(String nationalId) {
+    // Business functions
+
+    private IndividualCustomer getCustomerDetail(AddCreditRequest request) {
+        DataResult<IndividualCustomer> result = customerService.getByNationalId(request.getNationalId());
+        if (!result.isSuccess()) {
+            return customerService.add(MapperUtil.map(request, AddIndividualCustomerRequest.class)).getData();
+        }
+        return result.getData();
+    }
+
+    private int getCreditScore(String nationalId) {
         return creditScoreService.getCreditScore(nationalId);
     }
 
@@ -103,11 +116,15 @@ public class CreditManager implements CreditService {
         }
     }
 
-    private IndividualCustomer getCustomerDetails(String nationalId) {
-        DataResult<GetByNationalIdIndividualCustomerResponse> result = customerService.getByNationalId(nationalId);
-        if (Boolean.TRUE.equals(result.getSuccess())) {
-            return MapperUtil.map(result.getData(), IndividualCustomer.class);
+    // Business functions end
+
+    // Business rules
+
+    private Result checkCreditScore(int creditScore) {
+        if (creditScore > Constants.CREDIT_SCORE_MIN) {
+            return new SuccessResult();
         }
-        throw new IllegalArgumentException();
+        return new ErrorResult(Messages.INSUFFICIENT_CREDIT_SCORE);
     }
+    // Business rules end
 }
