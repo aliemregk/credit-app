@@ -1,7 +1,7 @@
 package com.credit.app.entities.concretes;
 
 import java.time.LocalDate;
-import com.credit.app.entities.abstracts.AbstractCustomer;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -16,7 +16,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class IndividualCustomer extends AbstractCustomer {
+public class IndividualCustomer extends Customer {
 
     @Column(nullable = false)
     private String firstName;
@@ -24,7 +24,7 @@ public class IndividualCustomer extends AbstractCustomer {
     @Column(nullable = false)
     private String lastName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String nationalId;
 
     @Column(nullable = false)
