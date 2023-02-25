@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import org.hibernate.validator.constraints.Length;
 
+import com.credit.app.business.constants.CustomerTypeEnum;
 import com.credit.app.business.constants.Messages;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -41,4 +42,7 @@ public class AddIndividualCustomerRequest {
 
     @Min(value = 0, message = "Guarantee" + Messages.MIN)
     private double guarantee;
+
+    @NotBlank(message = "Customer type " + Messages.REQUIRED)
+    private CustomerTypeEnum customerType;
 }

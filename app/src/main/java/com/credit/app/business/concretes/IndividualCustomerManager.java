@@ -10,7 +10,6 @@ import com.credit.app.business.constants.Messages;
 import com.credit.app.business.requests.individualCustomer.AddIndividualCustomerRequest;
 import com.credit.app.business.requests.individualCustomer.UpdateIndividualCustomerRequest;
 import com.credit.app.business.responses.individualCustomer.GetAllIndividualCustomerResponse;
-import com.credit.app.business.responses.individualCustomer.GetByIdIndividualCustomerResponse;
 import com.credit.app.core.utilities.business.BusinessRules;
 import com.credit.app.core.utilities.mapper.MapperUtil;
 import com.credit.app.core.utilities.results.ErrorResult;
@@ -35,13 +34,6 @@ public class IndividualCustomerManager implements IndividualCustomerService {
         Collection<IndividualCustomer> customers = individualCustomerDao.findAll();
         return new SuccessDataResult<>(Messages.CUSTOMER_MESSAGE + Messages.LISTED,
                 MapperUtil.mapAll(customers, GetAllIndividualCustomerResponse.class));
-    }
-
-    @Override
-    public DataResult<GetByIdIndividualCustomerResponse> getById(Long id) {
-        final IndividualCustomer customer = individualCustomerDao.findById(id).orElseThrow();
-        return new SuccessDataResult<>(Messages.CUSTOMER_MESSAGE + Messages.LISTED,
-                MapperUtil.map(customer, GetByIdIndividualCustomerResponse.class));
     }
 
     @Override
@@ -78,11 +70,14 @@ public class IndividualCustomerManager implements IndividualCustomerService {
         return new ErrorDataResult<>(Messages.CUSTOMER_MESSAGE + Messages.NOT_FOUND, null);
     }
 
+    // Business rules
+
     private Result checkCustomerExists(String nationalId) {
         if (getByNationalId(nationalId).isSuccess()) {
-            return new ErrorResult(Messages.USER_EXISTS);
+            return new ErrorResult(Messages.INDIVIDUAL_EXISTS);
         }
         return new SuccessResult();
     }
 
+    // Business rules end
 }
