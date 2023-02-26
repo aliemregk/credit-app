@@ -5,17 +5,21 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.credit.app.business.abstracts.CorporateCustomerService;
 import com.credit.app.business.abstracts.CreditService;
 import com.credit.app.business.abstracts.IndividualCustomerService;
 import com.credit.app.business.constants.Constants;
 import com.credit.app.business.constants.CreditStatusEnum;
 import com.credit.app.business.constants.Messages;
-import com.credit.app.business.requests.credit.AddCreditRequest;
+import com.credit.app.business.requests.corporateCustomer.AddCorporateCustomerRequest;
+import com.credit.app.business.requests.credit.AddCreditForCorporateRequest;
+import com.credit.app.business.requests.credit.AddCreditForIndividualRequest;
 import com.credit.app.business.requests.individualCustomer.AddIndividualCustomerRequest;
 import com.credit.app.business.responses.credit.CreditResultResponse;
 import com.credit.app.business.responses.credit.GetAllCreditResponse;
 import com.credit.app.business.responses.credit.GetByIdCreditResponse;
 import com.credit.app.business.utilities.creditScore.CreditScoreService;
+import com.credit.app.business.utilities.smsService.SmsUtil;
 import com.credit.app.core.utilities.business.BusinessRules;
 import com.credit.app.core.utilities.mapper.MapperUtil;
 import com.credit.app.core.utilities.results.ErrorResult;
@@ -25,6 +29,7 @@ import com.credit.app.core.utilities.results.dataResults.DataResult;
 import com.credit.app.core.utilities.results.dataResults.ErrorDataResult;
 import com.credit.app.core.utilities.results.dataResults.SuccessDataResult;
 import com.credit.app.dataAccess.abstracts.CreditDao;
+import com.credit.app.entities.concretes.CorporateCustomer;
 import com.credit.app.entities.concretes.Credit;
 import com.credit.app.entities.concretes.IndividualCustomer;
 
@@ -36,8 +41,10 @@ public class CreditManager implements CreditService {
 
     private static final String MESSAGE = "Credit(s)";
     private CreditDao creditDao;
-    private IndividualCustomerService indCustomerService;
+    private IndividualCustomerService individualCustomerService;
+    private CorporateCustomerService corporateCustomerService;
     private CreditScoreService creditScoreService;
+    private SmsUtil smsUtil;
 
     @Override
     public DataResult<Collection<GetAllCreditResponse>> getAll() {
@@ -56,7 +63,7 @@ public class CreditManager implements CreditService {
     }
 
     @Override
-    public DataResult<CreditResultResponse> add(AddCreditRequest addCreditRequest) {
+    public DataResult<CreditResultResponse> addCreditForIndividual(AddCreditForIndividualRequest addCreditRequest) {
 
         final int creditScore = getCreditScore(addCreditRequest.getNationalId());
 
@@ -65,11 +72,32 @@ public class CreditManager implements CreditService {
             return new ErrorDataResult<>(result.getMessage(), new CreditResultResponse(0, CreditStatusEnum.DENIED));
         }
 
-        final IndividualCustomer customer = getCustomerDetail(addCreditRequest);
+        final IndividualCustomer customer = getIndividualCustomerDetail(addCreditRequest);
         final double income = addCreditRequest.getIncome();
         final double guarantee = addCreditRequest.getGuarantee();
         final double creditAmount = generateCredit(creditScore, income, guarantee);
         creditDao.save(new Credit(creditAmount, customer));
+        smsUtil.sendInformation(customer.getNationalId());
+        return new SuccessDataResult<>(MESSAGE + Messages.ADDED,
+                new CreditResultResponse(creditAmount, CreditStatusEnum.APPROVED));
+    }
+
+    @Override
+    public DataResult<CreditResultResponse> addCreditForCorporate(AddCreditForCorporateRequest addCreditRequest) {
+
+        final int creditScore = getCreditScore(addCreditRequest.getTaxNumber());
+
+        Result result = BusinessRules.run(checkCreditScore(creditScore));
+        if (!result.isSuccess()) {
+            return new ErrorDataResult<>(result.getMessage(), new CreditResultResponse(0, CreditStatusEnum.DENIED));
+        }
+        
+        final CorporateCustomer customer = getCorporateCustomerDetail(addCreditRequest);
+        final double income = addCreditRequest.getIncome();
+        final double guarantee = addCreditRequest.getGuarantee();
+        final double creditAmount = generateCredit(creditScore, income, guarantee);
+        creditDao.save(new Credit(creditAmount, customer));
+        smsUtil.sendInformation(customer.getTaxNumber());
         return new SuccessDataResult<>(MESSAGE + Messages.ADDED,
                 new CreditResultResponse(creditAmount, CreditStatusEnum.APPROVED));
     }
@@ -88,10 +116,18 @@ public class CreditManager implements CreditService {
 
     // Business functions
 
-    private IndividualCustomer getCustomerDetail(AddCreditRequest request) {
-        DataResult<IndividualCustomer> result = indCustomerService.getByNationalId(request.getNationalId());
+    private IndividualCustomer getIndividualCustomerDetail(AddCreditForIndividualRequest request) {
+        DataResult<IndividualCustomer> result = individualCustomerService.getByNationalId(request.getNationalId());
         if (!result.isSuccess()) {
-            return indCustomerService.add(MapperUtil.map(request, AddIndividualCustomerRequest.class)).getData();
+            return individualCustomerService.add(MapperUtil.map(request, AddIndividualCustomerRequest.class)).getData();
+        }
+        return result.getData();
+    }
+
+    private CorporateCustomer getCorporateCustomerDetail(AddCreditForCorporateRequest request) {
+        DataResult<CorporateCustomer> result = corporateCustomerService.getByTaxNumber(request.getTaxNumber());
+        if (!result.isSuccess()) {
+            return corporateCustomerService.add(MapperUtil.map(request, AddCorporateCustomerRequest.class)).getData();
         }
         return result.getData();
     }

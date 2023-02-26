@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.credit.app.business.abstracts.CreditService;
-import com.credit.app.business.requests.credit.AddCreditRequest;
+import com.credit.app.business.requests.credit.AddCreditForCorporateRequest;
+import com.credit.app.business.requests.credit.AddCreditForIndividualRequest;
 import com.credit.app.business.responses.credit.CreditResultResponse;
 import com.credit.app.business.responses.credit.GetAllCreditResponse;
 import com.credit.app.business.responses.credit.GetByIdCreditResponse;
@@ -39,9 +40,16 @@ public class CreditsController {
         return creditService.getById(id);
     }
 
-    @PostMapping(path = "add")
-    public DataResult<CreditResultResponse> add(@RequestBody AddCreditRequest addCreditRequest) {
-        return creditService.add(addCreditRequest);
+    @PostMapping(path = "addindividual")
+    public DataResult<CreditResultResponse> addCreditForIndividual(
+            @RequestBody AddCreditForIndividualRequest addCreditRequest) {
+        return creditService.addCreditForIndividual(addCreditRequest);
+    }
+
+    @PostMapping(path = "addcorporate")
+    public DataResult<CreditResultResponse> addCreditForCorporate(
+            @RequestBody AddCreditForCorporateRequest addCreditRequest) {
+        return creditService.addCreditForCorporate(addCreditRequest);
     }
 
     @PutMapping(path = "update")

@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 import org.hibernate.validator.constraints.Length;
 
-import com.credit.app.business.constants.CustomerTypeEnum;
 import com.credit.app.business.constants.Messages;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -18,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AddCreditRequest {
+public class AddCreditForIndividualRequest {
     @NotBlank(message = "First name" + Messages.REQUIRED)
     @Length(min = 2, message = "First name" + Messages.TOO_SHORT)
     private String firstName;
@@ -44,6 +43,4 @@ public class AddCreditRequest {
     @Min(value = 0, message = "Guarantee" + Messages.MIN)
     private double guarantee;
 
-    @NotBlank(message = "Customer type " + Messages.REQUIRED)
-    private CustomerTypeEnum customerType;
 }

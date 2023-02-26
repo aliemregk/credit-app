@@ -2,7 +2,8 @@ package com.credit.app.business.abstracts;
 
 import java.util.Collection;
 
-import com.credit.app.business.requests.credit.AddCreditRequest;
+import com.credit.app.business.requests.credit.AddCreditForCorporateRequest;
+import com.credit.app.business.requests.credit.AddCreditForIndividualRequest;
 import com.credit.app.business.responses.credit.CreditResultResponse;
 import com.credit.app.business.responses.credit.GetAllCreditResponse;
 import com.credit.app.business.responses.credit.GetByIdCreditResponse;
@@ -16,7 +17,9 @@ public interface CreditService {
 
     DataResult<GetByIdCreditResponse> getById(Long id);
 
-    DataResult<CreditResultResponse> add(AddCreditRequest addCreditRequest);
+    DataResult<CreditResultResponse> addCreditForIndividual(AddCreditForIndividualRequest addIndividualCreditRequest);
+
+    DataResult<CreditResultResponse> addCreditForCorporate(AddCreditForCorporateRequest addCorporateCreditRequest);
 
     Result update(Credit credit);
 
