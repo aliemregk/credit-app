@@ -28,9 +28,6 @@ public class IndividualCustomer extends Customer {
     private String nationalId;
 
     @Column(nullable = false)
-    private double income;
-
-    @Column(nullable = false)
     private LocalDate birthDate;
 
 }

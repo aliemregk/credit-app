@@ -31,6 +31,9 @@ public class Customer extends AbstractEntity {
     @Column(nullable = false)
     private String phone;
 
+    @Column(nullable = false)
+    private double income;
+
     @Column
     private double guarantee;
 

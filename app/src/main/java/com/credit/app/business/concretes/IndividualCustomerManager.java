@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.credit.app.business.abstracts.IndividualCustomerService;
+import com.credit.app.business.constants.CustomerTypeEnum;
 import com.credit.app.business.constants.Messages;
 import com.credit.app.business.requests.individualCustomer.AddIndividualCustomerRequest;
 import com.credit.app.business.requests.individualCustomer.UpdateIndividualCustomerRequest;
@@ -44,6 +45,7 @@ public class IndividualCustomerManager implements IndividualCustomerService {
             return new ErrorDataResult<>(result.getMessage(), null);
         }
         final IndividualCustomer customerToAdd = MapperUtil.map(addRequest, IndividualCustomer.class);
+        customerToAdd.setCustomerType(CustomerTypeEnum.INDIVIDUAL);
         return new SuccessDataResult<>(Messages.CUSTOMER_MESSAGE + Messages.ADDED,
                 individualCustomerDao.save(customerToAdd));
     }
@@ -51,6 +53,7 @@ public class IndividualCustomerManager implements IndividualCustomerService {
     @Override
     public Result update(UpdateIndividualCustomerRequest updateRequest) {
         final IndividualCustomer customerToUpdate = MapperUtil.map(updateRequest, IndividualCustomer.class);
+        customerToUpdate.setCustomerType(CustomerTypeEnum.INDIVIDUAL);
         individualCustomerDao.save(customerToUpdate);
         return new SuccessResult(Messages.CUSTOMER_MESSAGE + Messages.UPDATED);
     }

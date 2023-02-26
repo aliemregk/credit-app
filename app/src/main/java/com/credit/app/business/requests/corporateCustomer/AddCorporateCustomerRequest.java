@@ -2,7 +2,6 @@ package com.credit.app.business.requests.corporateCustomer;
 
 import org.hibernate.validator.constraints.Length;
 
-import com.credit.app.business.constants.CustomerTypeEnum;
 import com.credit.app.business.constants.Messages;
 
 import jakarta.validation.constraints.Min;
@@ -26,10 +25,11 @@ public class AddCorporateCustomerRequest {
     @NotBlank(message = "Phone number" + Messages.REQUIRED)
     private String phone;
 
+    @NotBlank(message = "Income" + Messages.REQUIRED)
+    @Min(value = 0, message = "Income" + Messages.MIN)
+    private double income;
+
     @Min(value = 0, message = "Guarantee" + Messages.MIN)
     private double guarantee;
-
-    @NotBlank(message = "Customer type " + Messages.REQUIRED)
-    private CustomerTypeEnum customerType;
 
 }

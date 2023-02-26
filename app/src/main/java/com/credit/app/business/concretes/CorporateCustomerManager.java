@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.credit.app.business.abstracts.CorporateCustomerService;
+import com.credit.app.business.constants.CustomerTypeEnum;
 import com.credit.app.business.constants.Messages;
 import com.credit.app.business.requests.corporateCustomer.AddCorporateCustomerRequest;
 import com.credit.app.business.requests.corporateCustomer.UpdateCorporateCustomerRequest;
@@ -43,6 +44,7 @@ public class CorporateCustomerManager implements CorporateCustomerService {
             return new ErrorDataResult<>(result.getMessage(), null);
         }
         final CorporateCustomer customerToAdd = MapperUtil.map(addRequest, CorporateCustomer.class);
+        customerToAdd.setCustomerType(CustomerTypeEnum.CORPORATE);
         return new SuccessDataResult<>(Messages.CUSTOMER_MESSAGE + Messages.ADDED,
                 corporateCustomerDao.save(customerToAdd));
     }
@@ -50,6 +52,7 @@ public class CorporateCustomerManager implements CorporateCustomerService {
     @Override
     public Result update(UpdateCorporateCustomerRequest updateRequest) {
         final CorporateCustomer customerToUpdate = MapperUtil.map(updateRequest, CorporateCustomer.class);
+        customerToUpdate.setCustomerType(CustomerTypeEnum.CORPORATE);
         corporateCustomerDao.save(customerToUpdate);
         return new SuccessResult(Messages.CUSTOMER_MESSAGE + Messages.UPDATED);
     }
