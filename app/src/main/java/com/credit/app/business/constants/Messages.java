@@ -28,6 +28,7 @@ public final class Messages {
     public static final String TOO_SHORT = " is too short.";
     public static final String TOO_LONG = " is too long.";
     public static final String MIN = " can not be less than 0.";
+    public static final String CHAR_LIMIT = " must be 10 characters.";
 
     private Messages() {
     }

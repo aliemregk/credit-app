@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AddCreditForIndividualRequest {
-    
+
     @NotNull(message = "First name" + Messages.REQUIRED)
     @NotBlank(message = "First name" + Messages.REQUIRED)
     @Length(min = 2, message = "First name" + Messages.TOO_SHORT)
@@ -31,6 +31,7 @@ public class AddCreditForIndividualRequest {
 
     @NotNull(message = "First name" + Messages.REQUIRED)
     @NotBlank(message = "National ID" + Messages.REQUIRED)
+    @Length(min = 10, max = 10, message = "National ID" + Messages.CHAR_LIMIT)
     private String nationalId;
 
     @NotNull(message = "Income" + Messages.REQUIRED)

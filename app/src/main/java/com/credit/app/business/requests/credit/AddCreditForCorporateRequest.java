@@ -14,9 +14,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AddCreditForCorporateRequest {
-    
+
     @NotNull(message = "Tax number" + Messages.REQUIRED)
     @NotBlank(message = "Tax number" + Messages.REQUIRED)
+    @Length(min = 10, max = 10, message = "Tax number" + Messages.CHAR_LIMIT)
     private String taxNumber;
 
     @NotNull(message = "Company name" + Messages.REQUIRED)
