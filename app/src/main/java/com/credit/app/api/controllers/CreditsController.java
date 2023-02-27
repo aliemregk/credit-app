@@ -21,6 +21,7 @@ import com.credit.app.core.utilities.results.Result;
 import com.credit.app.core.utilities.results.dataResults.DataResult;
 import com.credit.app.entities.concretes.Credit;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -42,18 +43,18 @@ public class CreditsController {
 
     @PostMapping(path = "addindividual")
     public DataResult<CreditResultResponse> addCreditForIndividual(
-            @RequestBody AddCreditForIndividualRequest addCreditRequest) {
+            @RequestBody @Valid AddCreditForIndividualRequest addCreditRequest) {
         return creditService.addCreditForIndividual(addCreditRequest);
     }
 
     @PostMapping(path = "addcorporate")
     public DataResult<CreditResultResponse> addCreditForCorporate(
-            @RequestBody AddCreditForCorporateRequest addCreditRequest) {
+            @RequestBody @Valid AddCreditForCorporateRequest addCreditRequest) {
         return creditService.addCreditForCorporate(addCreditRequest);
     }
 
     @PutMapping(path = "update")
-    public Result update(@RequestBody Credit credit) {
+    public Result update(@RequestBody @Valid Credit credit) {
         return creditService.update(credit);
     }
 

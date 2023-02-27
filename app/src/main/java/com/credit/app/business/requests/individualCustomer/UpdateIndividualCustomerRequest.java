@@ -18,26 +18,28 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateIndividualCustomerRequest {
+
     @NotNull(message = "Customer ID" + Messages.REQUIRED)
     private int id;
 
+    @NotNull(message = "First name" + Messages.REQUIRED)
     @NotBlank(message = "First name" + Messages.REQUIRED)
     @Length(min = 2, message = "First name" + Messages.TOO_SHORT)
     private String firstName;
 
+    @NotNull(message = "Last name" + Messages.REQUIRED)
     @NotBlank(message = "Last name" + Messages.REQUIRED)
-    @Length(min = 2, message = "Last name" + Messages.TOO_SHORT)
     private String lastName;
 
+    @NotNull(message = "National ID" + Messages.REQUIRED)
     @NotBlank(message = "National ID" + Messages.REQUIRED)
-    @Length(min = 10, message = "National ID" + Messages.TOO_SHORT)
-    @Length(max = 10, message = "National ID" + Messages.TOO_LONG)
     private String nationalId;
 
-    @NotBlank(message = "Income" + Messages.REQUIRED)
-    @Min(value = 0, message = "Income" + Messages.MIN + "0.")
+    @NotNull(message = "Income" + Messages.REQUIRED)
+    @Min(value = 0, message = "Income" + Messages.MIN)
     private double income;
 
+    @NotNull(message = "Phone number" + Messages.REQUIRED)
     @NotBlank(message = "Phone number" + Messages.REQUIRED)
     private String phone;
 

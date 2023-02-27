@@ -18,6 +18,7 @@ import com.credit.app.business.responses.individualCustomer.GetAllIndividualCust
 import com.credit.app.core.utilities.results.Result;
 import com.credit.app.core.utilities.results.dataResults.DataResult;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -33,12 +34,12 @@ public class IndividualCustomersController {
     }
 
     @PostMapping(path = "add")
-    public Result add(@RequestBody AddIndividualCustomerRequest addRequest) {
+    public Result add(@RequestBody @Valid AddIndividualCustomerRequest addRequest) {
         return customerService.add(addRequest);
     }
 
     @PutMapping(path = "update")
-    public Result update(@RequestBody UpdateIndividualCustomerRequest customer) {
+    public Result update(@RequestBody @Valid UpdateIndividualCustomerRequest customer) {
         return customerService.update(customer);
     }
 

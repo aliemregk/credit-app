@@ -19,17 +19,21 @@ public class UpdateCorporateCustomerRequest {
     @NotNull(message = "Customer ID" + Messages.REQUIRED)
     private int id;
 
+    @NotNull(message = "Tax number" + Messages.REQUIRED)
     @NotBlank(message = "Tax number" + Messages.REQUIRED)
+    @Length(min = 10, max = 10, message = "Company name" + Messages.TOO_SHORT)
     private String taxNumber;
 
+    @NotNull(message = "Company name" + Messages.REQUIRED)
     @NotBlank(message = "Company name" + Messages.REQUIRED)
     @Length(min = 2, message = "Company name" + Messages.TOO_SHORT)
     private String companyName;
 
+    @NotNull(message = "Phone number" + Messages.REQUIRED)
     @NotBlank(message = "Phone number" + Messages.REQUIRED)
     private String phone;
 
-    @NotBlank(message = "Income" + Messages.REQUIRED)
+    @NotNull(message = "Income" + Messages.REQUIRED)
     @Min(value = 0, message = "Income" + Messages.MIN)
     private double income;
 

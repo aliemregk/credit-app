@@ -17,6 +17,8 @@ import com.credit.app.business.requests.corporateCustomer.UpdateCorporateCustome
 import com.credit.app.business.responses.corporateCustomer.GetAllCorporateCustomerResponse;
 import com.credit.app.core.utilities.results.Result;
 import com.credit.app.core.utilities.results.dataResults.DataResult;
+
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -32,12 +34,12 @@ public class CorporateCustomersController {
     }
 
     @PostMapping(path = "add")
-    public Result add(@RequestBody AddCorporateCustomerRequest addRequest) {
+    public Result add(@RequestBody @Valid AddCorporateCustomerRequest addRequest) {
         return customerService.add(addRequest);
     }
 
     @PutMapping(path = "update")
-    public Result update(@RequestBody UpdateCorporateCustomerRequest updateRequest) {
+    public Result update(@RequestBody @Valid UpdateCorporateCustomerRequest updateRequest) {
         return customerService.update(updateRequest);
     }
 
